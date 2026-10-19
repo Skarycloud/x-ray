@@ -334,4 +334,4 @@ These works informed X-RAY's design. They're cited for attribution. None of them
 
 ## License
 
-[MIT](LICENSE) © X-RAY contributors
+[MIT](LICENSE) © 2026 Sumanth Kumar
