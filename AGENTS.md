@@ -19,8 +19,9 @@ A Markdown-only Agent Skill. The repo root is the skill directory. `SKILL.md` is
 
 ## Checks before finishing a change
 
-1. All relative links resolve (no link checker is wired into the repo yet; check manually or with a local script).
-2. `SKILL.md` frontmatter is valid. If you have it, run `skills-ref validate .` ([agentskills/skills-ref](https://github.com/agentskills/agentskills/tree/main/skills-ref)).
-3. Terminology is consistent: tier names (Lightweight / Integrated / Critical) and evidence states (CONFIRMED / INFERRED / UNKNOWN / CONTRADICTED).
-4. Adapter docs cite official sources and a "checked" date.
-5. Say which checks you ran and which you didn't.
+1. Run `python tools/validate.py .`. It checks frontmatter, relative links and anchors, and terminology. CI runs it on every push.
+2. CI also runs the official `skills-ref validate` ([agentskills/skills-ref](https://github.com/agentskills/agentskills/tree/main/skills-ref)). Locally, pass the folder path from its parent (`skills-ref validate x-ray`); `skills-ref validate .` reports a false directory-name mismatch.
+3. If you change the `description`, re-run [evals/trigger-queries.md](evals/trigger-queries.md) on at least one host, or say you didn't.
+4. Terminology is consistent: tier names (Lightweight / Integrated / Critical) and evidence states (CONFIRMED / INFERRED / UNKNOWN / CONTRADICTED).
+5. Adapter docs cite official sources and a "checked" date.
+6. Say which checks you ran and which you didn't.

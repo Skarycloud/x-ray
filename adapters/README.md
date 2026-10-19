@@ -14,6 +14,8 @@ Docs last checked: **2026-10-19**. Host behavior changes often, so re-check the 
 | GitHub Copilot | Yes | **No** | [copilot.md](copilot.md) |
 | Gemini CLI | Yes | **No** | [gemini-cli.md](gemini-cli.md) |
 
+For hosts where agents don't invoke the skill reliably, see the optional [always-on pointer](always-on-pointer.md).
+
 "Host documents support" means the host's official docs describe loading Agent Skills from a `SKILL.md` directory. It does **not** mean anyone has run X-RAY on that host and confirmed that it triggers and behaves as intended. That validation is planned (see [evals/README.md](../evals/README.md)).
 
 ## Shared layout facts
@@ -27,6 +29,6 @@ Docs last checked: **2026-10-19**. Host behavior changes often, so re-check the 
 1. Install using only the steps in that host's adapter file.
 2. Confirm the host lists the skill (slash menu, `/skills`, settings, or equivalent).
 3. Confirm explicit invocation loads `SKILL.md`.
-4. Confirm implicit triggering on a matching task ("fix this bug in the checkout service") and **non**-triggering on an unrelated one ("write a haiku").
+4. Confirm implicit triggering and non-triggering with the queries in [evals/trigger-queries.md](../evals/trigger-queries.md).
 5. Confirm the agent can open a linked reference file (for example `references/verification.md`).
 6. Record host version, OS, date, and results in the adapter file.

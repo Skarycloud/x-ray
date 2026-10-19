@@ -20,8 +20,7 @@ Thanks for helping. X-RAY is early, and the most valuable contributions are **ev
 
 ## Before opening a PR
 
-- [ ] Relative links resolve.
-- [ ] `SKILL.md` frontmatter still valid; file still concise.
+- [ ] `python tools/validate.py .` passes.
 - [ ] Workflow, references, and templates agree with each other.
 - [ ] PR description lists checks you ran.
 

@@ -10,6 +10,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 [![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-blue)](SKILL.md)
 [![Format: Agent Skills](https://img.shields.io/badge/format-Agent%20Skills-6f42c1)](https://agentskills.io/specification)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![validate](https://github.com/Skarycloud/x-ray/actions/workflows/validate.yml/badge.svg)](https://github.com/Skarycloud/x-ray/actions/workflows/validate.yml)
 
 </div>
 
@@ -29,6 +30,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 - [When to use it](#when-to-use-it)
 - [Repository layout](#repository-layout)
 - [Evaluation](#evaluation)
+- [Security](#security)
 - [Limitations](#limitations)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -142,6 +144,8 @@ Project-scope paths, Windows commands, and the source for each host's behavior a
 | GitHub Copilot | [adapters/copilot.md](adapters/copilot.md) | Yes | No |
 | Gemini CLI | [adapters/gemini-cli.md](adapters/gemini-cli.md) | Yes | No |
 
+**Optional: always-on pointer.** Agents often don't invoke an installed skill on their own. [adapters/always-on-pointer.md](adapters/always-on-pointer.md) has a four-line snippet for the target repo's `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` that reminds the agent to use X-RAY. It's experimental and kept short on purpose, because always-loaded text has its own cost.
+
 Installing by cloning also brings the README, evals, and adapter docs. Hosts load files other than `SKILL.md` only on demand, so this should be harmless, but it's untested.
 
 ## Usage
@@ -193,6 +197,10 @@ Recent studies of agent skills shaped several rules. These choices follow from t
 | The largest source of skill-induced efficiency loss was excessive procedure, led by excessive verification (Dong et al.) | An explicit stop rule for verification; templates only when the work doesn't fit in a few lines; tiers bound depth in both directions. |
 | Skills often turned checklists and recipes into mandatory work, and agents changed environments to satisfy them (Dong et al.) | Examples are labeled illustrative; "don't change the environment to make a check pass" is a rule. |
 | Focused skills with a few modules outperformed exhaustive bundles (SkillsBench) | A short core workflow (about 120 lines); detail lives in references loaded only when a step needs it. |
+| In Vercel's evals, agents never invoked an available skill in 56% of cases; an always-loaded pointer helped, but "you MUST invoke" wording made agents ignore project context | Optional four-line [always-on pointer](adapters/always-on-pointer.md) that says "explore first, then use X-RAY". |
+| Always-loaded context files didn't generally improve success and raised cost by over 20% (Gloaguen et al.) | The pointer is a reminder, not the workflow, and is marked experimental. |
+| Hosts tend to under-trigger skills, and descriptions that summarize the workflow invite agents to skip the body (Anthropic `skill-creator`, Superpowers `writing-skills`) | The `description` leads with when to use it, in phrases users actually type. [Trigger queries](evals/trigger-queries.md) test it. |
+| 94% of real skills lack guards against rationalizing away steps, and 71% lack progress tracking (Hong et al.) | A "Gotchas" table of tempting thoughts, covering both skipping steps and overdoing them, and an optional checklist for Integrated and Critical work. |
 | Build evaluations before extensive documentation (Anthropic skill-authoring guidance) | **Not yet followed:** X-RAY was written before its evals. Building them is the top roadmap item. |
 
 ## When to use it
@@ -236,8 +244,10 @@ x-ray/
 │   ├── SYSTEM_MAP.md
 │   ├── CHANGE_PLAN.md
 │   └── VERIFICATION_REPORT.md
-├── adapters/                        Per-host install and discovery notes, with sources
-├── evals/                           Evaluation method and scoring rubric (no results yet)
+├── adapters/                        Per-host install notes and the optional always-on pointer
+├── evals/                           Evaluation method, scoring rubric, trigger queries (no results yet)
+├── tools/validate.py                Repository checks (stdlib only), run in CI
+├── .github/workflows/validate.yml   CI: repo checks plus the official skills-ref validator
 ├── AGENTS.md                        Rules for agents and humans editing this repo
 └── CONTRIBUTING.md
 ```
@@ -254,14 +264,25 @@ X-RAY's claim to usefulness has to come from measurement, not from how well its 
 
 **Current status:** the method exists. No tasks, fixtures, or results exist yet.
 
+## Security
+
+Skills run with the agent's permissions, and malicious skills are a documented supply-chain risk ([OWASP Agentic Skills Top 10](https://owasp.org/www-project-agentic-skills-top-10/)). For X-RAY specifically:
+
+- **The skill is Markdown only.** It has no scripts, hooks, or `allowed-tools` grants. `tools/validate.py` is for checking this repository in CI; the skill never tells an agent to run it.
+- **It tells the agent to treat repository content as untrusted data** and to ask before destructive or outward-facing actions. See [references/security-boundaries.md](references/security-boundaries.md).
+- **Install from this repository only, and read what you install.** For a fixed version, check out a specific commit after cloning: `git -C ~/.claude/skills/x-ray checkout <commit>`.
+
+Report a security problem in X-RAY through a GitHub issue. Leave exploit details out of the public issue and ask for a private contact.
+
 ## Limitations
 
 - **Untested on hosts.** Triggering and behavior on Claude Code, Codex, Cursor, Copilot, and Gemini CLI haven't been checked.
 - **Unevaluated.** There's no evidence yet that X-RAY improves outcomes over a baseline.
 - **Process skills often don't help.** In SWE-Skills-Bench, 39 of 49 public software-engineering skills produced no pass-rate gain. X-RAY is a process skill and may land in that group; only the evals can tell.
+- **It may not be invoked.** Hosts decide when to load a skill, and agents often don't. The always-on pointer may help; that's untested.
 - **Instruction-only.** X-RAY can't force an agent to follow it. Compliance depends on the model and host.
 - **Cost.** Investigation and verification cost time and tokens. Tiering and the stop rule are meant to keep trivial tasks cheap; whether they do is unmeasured.
-- **No tooling.** No scripts, linters, or CI checks ship with the skill yet.
+- **No runtime tooling.** The skill ships no scripts. CI only checks this repository's own format and links, not agent behavior.
 
 ## Roadmap
 
@@ -269,7 +290,7 @@ Planned, not implemented:
 
 1. **Host validation.** Run the checklist in [adapters/README.md](adapters/README.md) on each host and record the results.
 2. **Evaluation v1** (highest priority, since the skill was written before its evals). Start with 3–5 tasks: a trivial change, stale documentation, and a repo requirement that conflicts with the skill's examples. Then grow to about 20 validated tasks, run baseline vs X-RAY, and publish raw results, including negative ones.
-3. **Repository checks.** CI for Markdown links, `SKILL.md` frontmatter validation, and length limits.
+3. **Trigger testing.** Run [evals/trigger-queries.md](evals/trigger-queries.md) on each host, with and without the always-on pointer.
 4. **Packaging.** A slim release containing only skill files; possibly a Claude Code plugin.
 5. **Revision from evidence.** Cut or change steps the evals show to be ineffective or costly.
 
@@ -299,7 +320,12 @@ These works informed X-RAY's design. They're cited for attribution. None of them
 - Li et al. *SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks.* arXiv:2602.12670, 2026. Paired with/without-skill evaluation; focused skills outperformed exhaustive bundles.
 - Han et al. *SWE-Skills-Bench: Do Agent Skills Actually Help in Real-World Software Engineering?* arXiv:2603.15401, 2026. Most SWE skills showed no gain; harm traced to guidance conflicting with project context.
 - Dong et al. *Agent Skills Can Be Harmful: An Empirical Study of Skill-Induced Failures in LLM Agents.* arXiv:2608.11888, 2026. Failure taxonomy; excessive verification and procedure as the main efficiency regressions.
-- Hong, Imani, Ahmed. *From Anatomy to Smells: An Empirical Study of SKILL.md in Agent Skills.* arXiv:2607.01456, 2026. Authoring best-practice violations are near-universal in real skills.
+- Hong, Imani, Ahmed. *From Anatomy to Smells: An Empirical Study of SKILL.md in Agent Skills.* arXiv:2607.01456, 2026. Taxonomy of 26 skill smells; X-RAY was audited against it.
+- Gloaguen et al. *Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?* arXiv:2602.11988, 2026. Context files didn't generally improve success and raised cost by over 20%.
+- Gao (Vercel). *AGENTS.md outperforms skills in our agent evals.* 2026. https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals. Skills went uninvoked in 56% of cases; pointer wording mattered.
+- Anthropic, `skill-creator` skill. https://github.com/anthropics/skills. Under-triggering, trigger-query evaluation, explaining why rather than shouting rules.
+- Jesse Vincent, `writing-skills` in *obra/superpowers*. https://github.com/obra/superpowers. Trigger-only descriptions; rationalization tables.
+- OWASP. *Agentic Skills Top 10.* https://owasp.org/www-project-agentic-skills-top-10/. Malicious skills as a supply-chain risk.
 
 </details>
 

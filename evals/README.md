@@ -26,7 +26,9 @@ Hold constant: model and version, host and version, temperature/effort settings,
 
 Run each (task, condition) pair **at least 5 times**, because agent runs are nondeterministic. Report the distribution, not only the mean.
 
-Optional third condition: **X-RAY + another skill set** (for example obra/superpowers) to test complementarity, not replacement.
+Optional third condition: **X-RAY + [always-on pointer](../adapters/always-on-pointer.md)**, to test whether invocation, not content, is the bottleneck.
+
+Optional fourth condition: **X-RAY + another skill set** (for example obra/superpowers) to test complementarity, not replacement.
 
 ## Task set (to be built)
 
