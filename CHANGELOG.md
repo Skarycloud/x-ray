@@ -14,7 +14,7 @@ All notable changes to X-RAY. Versions follow the `version` in [`.claude-plugin/
 - **Eval cases** in the `claude plugin eval` format under [`evals/cases/`](evals/cases/), and a headless [outcome harness](evals/outcome-harness/README.md) for Claude Code versions without `plugin eval`.
 - **Trigger queries** and harness; first Claude Code trigger pilot.
 - **CI:** repository checks, the official `skills-ref` validator, and `claude plugin validate`.
-- **npm installer** `x-ray-skill` ([`bin/cli.js`](bin/cli.js)): `npx x-ray-skill install` copies the skill into the folders each detected agent reads. Not yet published.
+- **npm installer** `x-ray-skill` ([`bin/cli.js`](bin/cli.js)): `npx x-ray-skill install` copies the skill into the folders each detected agent reads. Published on [npm](https://www.npmjs.com/package/x-ray-skill).
 - Optional [always-on pointer](adapters/always-on-pointer.md); [Gemini CLI adapter](adapters/gemini-cli.md); [SECURITY.md](SECURITY.md); issue templates.
 
 ## 0.1.0 — 2026-10-19

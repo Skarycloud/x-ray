@@ -21,7 +21,7 @@ Frontmatter: Claude Code reads `name` and `description`. It documents `license` 
 
 ## Installation
 
-**Plugin (recommended).** Tested 2026-10-19 with a local copy of the marketplace on Claude Code 2.1.131: the marketplace added, the plugin installed and enabled, and the skill registered as `x-ray:x-ray`. Not yet tested from GitHub.
+**Plugin (recommended).** Tested 2026-10-19 on Claude Code 2.1.131, from GitHub and from a local copy: the marketplace added and the plugin installed and enabled; the skill registered as `x-ray:x-ray`.
 
 ```text
 /plugin marketplace add Skarycloud/x-ray
@@ -29,6 +29,8 @@ Frontmatter: Claude Code reads `name` and `description`. It documents `license` 
 ```
 
 The same from a shell: `claude plugin marketplace add Skarycloud/x-ray`, then `claude plugin install x-ray@x-ray`.
+
+**npm installer.** `npx x-ray-skill install --agent claude` copies the skill to `~/.claude/skills/x-ray` (tested from the published package).
 
 **Plain skill (untested).** Get the skill folder first. The skill lives in `skills/x-ray/` inside the repository:
 
@@ -75,7 +77,7 @@ Caveats: one run per query, one model, one tiny fixture, and the 3-turn cap (T8 
 
 ### 2026-10-19: plugin install
 
-With `CLAUDE_CONFIG_DIR` pointed at an empty folder: `claude plugin marketplace add <local copy of this repo>` and `claude plugin install x-ray@x-ray` succeeded, the plugin was enabled at version 0.2.0, and a headless session listed the skill as `x-ray:x-ray`. Installing from GitHub (`Skarycloud/x-ray`) isn't tested yet.
+With `CLAUDE_CONFIG_DIR` pointed at an empty folder: `claude plugin marketplace add <local copy of this repo>` and `claude plugin install x-ray@x-ray` succeeded, the plugin was enabled at version 0.2.0, and a headless session listed the skill as `x-ray:x-ray`. Repeated the same day straight from GitHub (`claude plugin marketplace add Skarycloud/x-ray`): installed and enabled at 0.2.0.
 
 ### 2026-10-19: outcome pilot
 

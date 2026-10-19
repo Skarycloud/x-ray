@@ -8,6 +8,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 
 [![Status: experimental](https://img.shields.io/badge/status-experimental-orange)](#limitations)
 [![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/x-ray-skill?label=npm)](https://www.npmjs.com/package/x-ray-skill)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757)](#quick-start)
 [![Format: Agent Skills](https://img.shields.io/badge/format-Agent%20Skills-6f42c1)](https://agentskills.io/specification)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -125,7 +126,7 @@ The user's task comes first, then the target repository's own instructions, vers
 /plugin install x-ray@x-ray
 ```
 
-This is the same mechanism Anthropic's own skills repository uses. Tested on Claude Code 2.1.131 with a local copy of this marketplace: it installed, enabled, and registered the skill as `x-ray:x-ray`. Installing straight from GitHub hasn't been tested yet.
+This is the same mechanism Anthropic's own skills repository uses. Tested 2026-10-19 on Claude Code 2.1.131, straight from GitHub: the marketplace added and the plugin installed and enabled at version 0.2.0. A local copy of the plugin also registered the skill as `x-ray:x-ray` in a live session.
 
 ### Any host, one command (npm)
 
@@ -133,8 +134,10 @@ This is the same mechanism Anthropic's own skills repository uses. Tested on Cla
 npx x-ray-skill install
 ```
 
+Published on npm as [`x-ray-skill`](https://www.npmjs.com/package/x-ray-skill).
+
 > [!WARNING]
-> **Not published to npm yet.** The installer is built and tested locally (see below), but until it's published this command fails. Don't run `npx x-ray`: that name belongs to an unrelated web-scraping package.
+> Use `x-ray-skill`, not `x-ray`. The npm name `x-ray` belongs to an unrelated web-scraping package.
 
 The installer copies `skills/x-ray/` into the skill folders of the agents it finds in your home folder: `~/.claude/skills/` for Claude Code, and `~/.agents/skills/` for Codex, Cursor, Copilot, and Gemini CLI, which all read that shared path. It has no dependencies and never overwrites a folder that isn't X-RAY unless you pass `--force`.
 
@@ -146,7 +149,7 @@ npx x-ray-skill status                      # where X-RAY is installed, and whic
 npx x-ray-skill uninstall
 ```
 
-Tested on Windows 11 with Node 22 from a packed tarball in a throwaway home folder: detection, install, update, the foreign-folder guard, project scope, status, and uninstall all behaved as described, and the installed files matched the source. CI repeats a smoke test on Linux.
+Tested 2026-10-19 on Windows 11 with Node 22, from the published npm package and from a local build, in throwaway home folders: detection, install, update, the foreign-folder guard, project scope, status, and uninstall all behaved as described, and the installed files matched the repository. CI repeats a smoke test on Linux.
 
 ### Any host (plain skill folder)
 
@@ -307,7 +310,7 @@ How X-RAY compares with the practices of Anthropic's [skills repository](https:/
 | Practice | Where it comes from | X-RAY |
 | --- | --- | --- |
 | Skill at `skills/<name>/SKILL.md`, separate from repo docs | Anthropic, Superpowers, Vercel, Ponytail, OpenAI portable plugins | ✅ [`skills/x-ray/`](skills/x-ray/SKILL.md) |
-| Claude Code plugin marketplace (`.claude-plugin/`) | Anthropic, Superpowers, Ponytail | ✅ installs and registers (local test) |
+| Claude Code plugin marketplace (`.claude-plugin/`) | Anthropic, Superpowers, Ponytail | ✅ installs from GitHub |
 | Valid frontmatter; `name` matches folder | Agent Skills spec | ✅ checked in CI by the official `skills-ref` |
 | Manifests validated by the host's own tool | Claude Code docs | ✅ `claude plugin validate` in CI |
 | `SKILL.md` under 500 lines; references one level deep | Spec; authoring guidance | ✅ 143 lines; all references linked from `SKILL.md` |
@@ -317,7 +320,7 @@ How X-RAY compares with the practices of Anthropic's [skills repository](https:/
 | Evals with a no-skill baseline, 3+ runs | Authoring guidance; `claude plugin eval` | ⚠️ 3 cases in the official format; one paired pilot, inconclusive |
 | Tested with each model you plan to use | Authoring guidance | ❌ only `claude-opus-4-7` so far |
 | Disclaimer: test before relying on it for critical work | Anthropic skills README | ✅ status notice and [Limitations](#limitations) |
-| One-command install across agents | Impeccable (`npx impeccable skills install`), Vercel's `skills` CLI | ⚠️ `npx x-ray-skill install` built and tested locally; not yet published to npm |
+| One-command install across agents | Impeccable (`npx impeccable skills install`), Vercel's `skills` CLI | ✅ `npx x-ray-skill install`, published on npm |
 | Changelog, security policy, issue templates | Common open-source practice | ✅ [CHANGELOG](CHANGELOG.md), [SECURITY](SECURITY.md), issue forms |
 
 ## When to use it
