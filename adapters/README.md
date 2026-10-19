@@ -8,7 +8,7 @@ Docs last checked: **2026-10-19**. Host behavior changes often, so re-check the 
 
 | Host | Host documents native `SKILL.md` support | X-RAY tested on this host | Adapter |
 | --- | --- | --- | --- |
-| Claude Code | Yes | **No** | [claude-code.md](claude-code.md) |
+| Claude Code | Yes | **Trigger pilot only** | [claude-code.md](claude-code.md) |
 | OpenAI Codex | Yes | **No** | [codex.md](codex.md) |
 | Cursor | Yes | **No** | [cursor.md](cursor.md) |
 | GitHub Copilot | Yes | **No** | [copilot.md](copilot.md) |

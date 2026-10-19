@@ -2,7 +2,7 @@
 
 Use these to check whether a host loads X-RAY when it should, and leaves it alone when it shouldn't. They support step 4 of the [host validation checklist](../adapters/README.md#validation-checklist-for-a-host-to-do-before-marking-tested).
 
-**Status:** Written, not yet run on any host.
+**Status:** Pilot run on Claude Code, 1 run per query (2026-10-19): see the [Claude Code test record](../adapters/claude-code.md#test-record). Not yet run on other hosts.
 
 ## Method
 

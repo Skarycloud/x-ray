@@ -15,7 +15,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 </div>
 
 > [!IMPORTANT]
-> **X-RAY is experimental.** The skill is written, but it hasn't been tested on any host and hasn't been evaluated against a baseline. Nothing in this repository claims it improves agent results. See [Limitations](#limitations) and [Evaluation](#evaluation).
+> **X-RAY is experimental.** A first trigger pilot on Claude Code shows the skill loads when it should, but its effect on results hasn't been evaluated against a baseline. Nothing in this repository claims it improves agent results. See [Limitations](#limitations) and [Evaluation](#evaluation).
 
 ---
 
@@ -153,7 +153,7 @@ Project-scope paths, Windows commands, and the source for each host's behavior a
 
 | Host | Adapter | Host docs support `SKILL.md` | Tested with X-RAY |
 | --- | --- | --- | --- |
-| Claude Code | [adapters/claude-code.md](adapters/claude-code.md) | Yes | No |
+| Claude Code | [adapters/claude-code.md](adapters/claude-code.md) | Yes | Trigger pilot only ([results](adapters/claude-code.md#test-record)) |
 | OpenAI Codex | [adapters/codex.md](adapters/codex.md) | Yes | No |
 | Cursor | [adapters/cursor.md](adapters/cursor.md) | Yes | No |
 | GitHub Copilot | [adapters/copilot.md](adapters/copilot.md) | Yes | No |
@@ -361,10 +361,10 @@ Report a security problem in X-RAY through a GitHub issue. Leave exploit details
 
 ## Limitations
 
-- **Untested on hosts.** Triggering and behavior on Claude Code, Codex, Cursor, Copilot, and Gemini CLI haven't been checked.
+- **Barely tested on hosts.** A small trigger pilot on Claude Code (1 run per query, one model) loaded X-RAY on 10/10 matching requests and 0/10 non-matching ones. Behavior after loading, and every other host, are untested.
 - **Unevaluated.** There's no evidence yet that X-RAY improves outcomes over a baseline.
 - **Process skills often don't help.** In SWE-Skills-Bench, 39 of 49 public software-engineering skills produced no pass-rate gain. X-RAY is a process skill and may land in that group; only the evals can tell.
-- **It may not be invoked.** Hosts decide when to load a skill, and agents often don't. The always-on pointer may help; that's untested.
+- **It may not be invoked.** Hosts decide when to load a skill. On the Claude Code pilot it was invoked reliably without the pointer; other models and hosts may differ.
 - **Instruction-only.** X-RAY can't force an agent to follow it. Compliance depends on the model and host.
 - **Cost.** Investigation and verification cost time and tokens. Tiering and the stop rule are meant to keep trivial tasks cheap; whether they do is unmeasured.
 - **No runtime tooling.** The skill ships no scripts. CI only checks this repository's own format and links, not agent behavior.
@@ -375,7 +375,7 @@ Planned, not implemented:
 
 1. **Host validation.** Run the checklist in [adapters/README.md](adapters/README.md) on each host and record the results.
 2. **Evaluation v1** (highest priority, since the skill was written before its evals). Start with 3–5 tasks: a trivial change, stale documentation, and a repo requirement that conflicts with the skill's examples. Then grow to about 20 validated tasks, run baseline vs X-RAY, and publish raw results, including negative ones.
-3. **Trigger testing.** Run [evals/trigger-queries.md](evals/trigger-queries.md) on each host, with and without the always-on pointer.
+3. **Trigger testing.** Repeat the [trigger queries](evals/trigger-queries.md) with 3 runs each and a smaller model on Claude Code, then on the other hosts.
 4. **Packaging.** A slim release containing only skill files; possibly a Claude Code plugin.
 5. **Revision from evidence.** Cut or change steps the evals show to be ineffective or costly.
 

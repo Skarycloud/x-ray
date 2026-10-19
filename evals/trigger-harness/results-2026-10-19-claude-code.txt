@@ -1,0 +1,27 @@
+meta: {'model': 'claude-opus-4-7', 'version': '2.1.131', 'skills_listed': True}
+skill-only           should-trigger: 10/10 triggered
+skill-only           should-not-trigger: 0/10 triggered
+skill-plus-pointer   should-trigger: 10/10 triggered
+skill-plus-pointer   should-not-trigger: 1/10 triggered
+
+query    skill-only                     skill-plus-pointer
+T1       Y!                             Y!
+T2       Y!                             Y!
+T3       Y!                             Y!
+T4       Y!                             Y!
+T5       Y!                             Y!
+T6       Y!                             Y!
+T7       Y!                             Y!
+T8       Y!                             Y!
+T9       Y!                             Y!
+T10      Y!                             Y!
+N1       n                              Y!
+N2       n!                             n!
+N3       n                              n
+N4       n                              n
+N5       n                              n
+N6       n! (other: security-review)    n! (other: security-review)
+N7       n                              n
+N8       n                              n
+N9       n                              n
+N10      n                              n
