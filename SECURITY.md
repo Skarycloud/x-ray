@@ -2,7 +2,7 @@
 
 ## What X-RAY contains
 
-The skill in [`skills/x-ray/`](skills/x-ray/SKILL.md) is Markdown only. It ships no scripts, hooks, MCP servers, or `allowed-tools` grants, and the Claude Code plugin declares no components besides the skill. The Python files under `tools/` and `evals/` are for developing and testing this repository; the skill never tells an agent to run them.
+The skill in [`skills/x-ray/`](skills/x-ray/SKILL.md) is Markdown only. It ships no scripts, hooks, MCP servers, or `allowed-tools` grants, and the Claude Code plugin declares no components besides the skill. The npm installer, [`bin/cli.js`](bin/cli.js), has no dependencies and only copies `skills/x-ray/` into agent skill folders; it refuses to overwrite a folder that isn't X-RAY unless you pass `--force`. The Python files under `tools/` and `evals/` are for developing and testing this repository; the skill never tells an agent to run them.
 
 Skills run with the permissions of the agent that loads them, so read what you install, and install only from this repository: https://github.com/Skarycloud/x-ray.
 

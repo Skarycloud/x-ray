@@ -127,6 +127,27 @@ The user's task comes first, then the target repository's own instructions, vers
 
 This is the same mechanism Anthropic's own skills repository uses. Tested on Claude Code 2.1.131 with a local copy of this marketplace: it installed, enabled, and registered the skill as `x-ray:x-ray`. Installing straight from GitHub hasn't been tested yet.
 
+### Any host, one command (npm)
+
+```bash
+npx x-ray-skill install
+```
+
+> [!WARNING]
+> **Not published to npm yet.** The installer is built and tested locally (see below), but until it's published this command fails. Don't run `npx x-ray`: that name belongs to an unrelated web-scraping package.
+
+The installer copies `skills/x-ray/` into the skill folders of the agents it finds in your home folder: `~/.claude/skills/` for Claude Code, and `~/.agents/skills/` for Codex, Cursor, Copilot, and Gemini CLI, which all read that shared path. It has no dependencies and never overwrites a folder that isn't X-RAY unless you pass `--force`.
+
+```bash
+npx x-ray-skill install --agent claude      # choose agents: claude, agents, cursor, copilot, gemini, all
+npx x-ray-skill install --project           # install into the current repository instead of your home folder
+npx x-ray-skill install --dry-run           # show what would change
+npx x-ray-skill status                      # where X-RAY is installed, and which version
+npx x-ray-skill uninstall
+```
+
+Tested on Windows 11 with Node 22 from a packed tarball in a throwaway home folder: detection, install, update, the foreign-folder guard, project scope, status, and uninstall all behaved as described, and the installed files matched the source. CI repeats a smoke test on Linux.
+
 ### Any host (plain skill folder)
 
 The skill is the [`skills/x-ray/`](skills/x-ray/) folder. Copy that folder, not the whole repository:
@@ -296,6 +317,7 @@ How X-RAY compares with the practices of Anthropic's [skills repository](https:/
 | Evals with a no-skill baseline, 3+ runs | Authoring guidance; `claude plugin eval` | ⚠️ 3 cases in the official format; one paired pilot, inconclusive |
 | Tested with each model you plan to use | Authoring guidance | ❌ only `claude-opus-4-7` so far |
 | Disclaimer: test before relying on it for critical work | Anthropic skills README | ✅ status notice and [Limitations](#limitations) |
+| One-command install across agents | Impeccable (`npx impeccable skills install`), Vercel's `skills` CLI | ⚠️ `npx x-ray-skill install` built and tested locally; not yet published to npm |
 | Changelog, security policy, issue templates | Common open-source practice | ✅ [CHANGELOG](CHANGELOG.md), [SECURITY](SECURITY.md), issue forms |
 
 ## When to use it
@@ -339,6 +361,7 @@ x-ray/
 │   ├── templates/                   Optional formats, each with a short form
 │   └── LICENSE
 ├── .claude-plugin/                  Claude Code plugin manifest and marketplace
+├── bin/cli.js, package.json         npm installer (`npx x-ray-skill install`), no dependencies
 ├── adapters/                        Per-host install notes and the optional always-on pointer
 ├── evals/                           Method, rubric, eval cases, trigger and outcome harnesses, results
 ├── tools/validate.py                Repository checks (stdlib only), run in CI
@@ -372,7 +395,7 @@ Whether X-RAY improves results is still unknown.
 
 Skills run with the agent's permissions, and malicious skills are a documented supply-chain risk ([OWASP Agentic Skills Top 10](https://owasp.org/www-project-agentic-skills-top-10/)). For X-RAY specifically:
 
-- **The skill is Markdown only.** It has no scripts, hooks, or `allowed-tools` grants. `tools/validate.py` is for checking this repository in CI; the skill never tells an agent to run it.
+- **The skill is Markdown only.** It has no scripts, hooks, or `allowed-tools` grants. The npm installer (`bin/cli.js`, about 170 lines, no dependencies) only copies the skill folder; read it before running it. `tools/validate.py` and the eval harnesses are for developing this repository; the skill never tells an agent to run them.
 - **It tells the agent to treat repository content as untrusted data** and to ask before destructive or outward-facing actions. See [security-boundaries.md](skills/x-ray/references/security-boundaries.md).
 - **Install from this repository only, and read what you install.** The plugin pins to the version in its manifest; for a plain-folder install, copy from a specific commit or [release](CHANGELOG.md).
 

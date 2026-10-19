@@ -24,6 +24,12 @@ Thanks for helping. X-RAY is early, and the most valuable contributions are **ev
 - [ ] Workflow, references, and templates agree with each other.
 - [ ] PR description lists checks you ran.
 
+## Releasing (maintainers)
+
+1. Bump the version in `skills/x-ray/SKILL.md`, `.claude-plugin/plugin.json`, and `package.json`; add a [CHANGELOG.md](CHANGELOG.md) entry; run `python tools/validate.py .`.
+2. Check the npm package contents: `npm pack --dry-run` should list only `bin/cli.js`, `skills/x-ray/`, `LICENSE`, `README.md`, and `package.json`.
+3. Publish: `npm login`, then `npm publish`. Tag the release: `git tag v<version> && git push --tags`.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the [MIT License](LICENSE).

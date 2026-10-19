@@ -21,7 +21,7 @@ A Markdown-only Agent Skill, packaged as a Claude Code plugin. The skill is [`sk
 
 1. Run `python tools/validate.py .`. It checks frontmatter, relative links and anchors, and terminology. CI runs it on every push.
 2. CI also runs the official validators: `skills-ref validate skills/x-ray` ([agentskills/skills-ref](https://github.com/agentskills/agentskills/tree/main/skills-ref)) and `claude plugin validate .` plus `claude plugin validate .claude-plugin/plugin.json`. Run them locally when you change frontmatter or the manifests.
-3. When you bump the version, change it in both `skills/x-ray/SKILL.md` and `.claude-plugin/plugin.json`, and add a [CHANGELOG.md](CHANGELOG.md) entry.
+3. When you bump the version, change it in `skills/x-ray/SKILL.md`, `.claude-plugin/plugin.json`, and `package.json` (the validator checks they match), and add a [CHANGELOG.md](CHANGELOG.md) entry.
 4. If you change the `description`, re-run [evals/trigger-queries.md](evals/trigger-queries.md) on at least one host, or say you didn't.
 5. Terminology is consistent: tier names (Lightweight / Integrated / Critical) and evidence states (CONFIRMED / INFERRED / UNKNOWN / CONTRADICTED).
 6. Adapter docs cite official sources and a "checked" date.

@@ -43,3 +43,19 @@ jobs:
         run: |
           claude plugin validate .claude-plugin/plugin.json
           claude plugin validate .
+
+  npm-installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Pack and smoke-test the installer in a throwaway home folder
+        run: |
+          npm pack
+          export HOME="$RUNNER_TEMP/home" && mkdir -p "$HOME/.claude"
+          npx -y --package ./x-ray-skill-*.tgz x-ray-skill install
+          diff -r skills/x-ray "$HOME/.claude/skills/x-ray"
+          npx -y --package ./x-ray-skill-*.tgz x-ray-skill uninstall
+          test ! -e "$HOME/.claude/skills/x-ray"

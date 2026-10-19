@@ -55,14 +55,17 @@ def check_skills(root, errors):
         errors.append("No skills found under skills/<name>/SKILL.md")
     for d in dirs:
         check_skill(d, errors)
-    manifest = root / ".claude-plugin" / "plugin.json"
-    if manifest.is_file():
-        import json
-        plugin_version = json.loads(manifest.read_text(encoding="utf-8")).get("version")
-        for d in dirs:
-            m = re.search(r'^\s+version:\s*"?([^"\n]+)"?', (d / "SKILL.md").read_text(encoding="utf-8"), re.M)
-            if m and m.group(1) != plugin_version:
-                errors.append(f"{d.name}: SKILL.md version {m.group(1)} != plugin.json version {plugin_version}")
+    import json
+    versions = {}
+    for rel in (".claude-plugin/plugin.json", "package.json"):
+        if (root / rel).is_file():
+            versions[rel] = json.loads((root / rel).read_text(encoding="utf-8")).get("version")
+    for d in dirs:
+        m = re.search(r'^\s+version:\s*"?([^"\n]+)"?', (d / "SKILL.md").read_text(encoding="utf-8"), re.M)
+        if m:
+            versions[f"skills/{d.name}/SKILL.md"] = m.group(1)
+    if len(set(versions.values())) > 1:
+        errors.append("Version mismatch: " + ", ".join(f"{k}={v}" for k, v in versions.items()))
 
 
 def check_skill(root, errors):

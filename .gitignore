@@ -13,3 +13,6 @@ Thumbs.db
 evals/runs/
 evals/**/output/
 evals/cases/results/
+
+# npm pack output
+*.tgz

@@ -1,0 +1,24 @@
+{
+  "name": "x-ray-skill",
+  "version": "0.2.0",
+  "description": "Installer for X-RAY, an evidence-based engineering skill for AI coding agents working on existing code",
+  "license": "MIT",
+  "author": "Sumanth Kumar (https://github.com/Skarycloud)",
+  "homepage": "https://github.com/Skarycloud/x-ray#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Skarycloud/x-ray.git"
+  },
+  "bugs": "https://github.com/Skarycloud/x-ray/issues",
+  "keywords": ["agent-skills", "claude-code", "codex", "cursor", "copilot", "gemini-cli", "skill"],
+  "bin": {
+    "x-ray-skill": "bin/cli.js"
+  },
+  "files": [
+    "bin/cli.js",
+    "skills/x-ray/"
+  ],
+  "engines": {
+    "node": ">=16.7"
+  }
+}
