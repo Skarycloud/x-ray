@@ -347,7 +347,7 @@ X-RAY's claim to usefulness has to come from measurement, not from how well its 
 - **Tasks chosen to expose harm too:** trivial changes where X-RAY should add no overhead, and tasks where the repo's requirements conflict with the skill's examples.
 - **Negative results get published.** A "no gain" result is realistic: in SWE-Skills-Bench, most public software-engineering skills showed none.
 
-**Current status:** the method exists. No tasks, fixtures, or results exist yet.
+**Current status:** the method exists. A [trigger pilot](adapters/claude-code.md#test-record) on Claude Code shows the skill loads on matching requests. No outcome tasks, fixtures, or results exist yet, so whether X-RAY improves results is still unknown.
 
 ## Security
 

@@ -1,6 +1,6 @@
 # Evaluation methodology
 
-> **Status: methodology only.** No evaluation tasks, fixtures, or harness exist yet, and **no results have been produced.** Nothing in this repository claims X-RAY improves agent performance. This document defines how that claim would be tested.
+> **Status: methodology, plus a trigger pilot.** A [trigger harness](trigger-harness/README.md) exists and has been piloted on Claude Code; it measures only whether the skill loads. No outcome tasks or results exist yet. Nothing in this repository claims X-RAY improves agent performance. This document defines how that claim would be tested.
 
 ## Question
 
