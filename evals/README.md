@@ -1,6 +1,6 @@
 # Evaluation methodology
 
-> **Status: methodology, plus a trigger pilot.** A [trigger harness](trigger-harness/README.md) exists and has been piloted on Claude Code; it measures only whether the skill loads. No outcome tasks or results exist yet. Nothing in this repository claims X-RAY improves agent performance. This document defines how that claim would be tested.
+> **Status: methodology, three eval cases, and two pilots.** A [trigger pilot](trigger-harness/README.md) on Claude Code measured whether the skill loads; a first [outcome pilot](outcome-harness/README.md) with and without X-RAY was inconclusive. Nothing in this repository claims X-RAY improves agent performance. This document defines how that claim would be tested.
 
 ## Question
 
@@ -30,22 +30,35 @@ Optional third condition: **X-RAY + [always-on pointer](../adapters/always-on-po
 
 Optional fourth condition: **X-RAY + another skill set** (for example obra/superpowers) to test complementarity, not replacement.
 
-## Task set (to be built)
+## Task set
 
-Each task is a directory:
+Cases use the format of Claude Code's official [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals), so any contributor can run them with one command. The plugin manifest points that command at [`evals/cases/`](cases/):
 
 ```text
-evals/tasks/<task-id>/
-├── task.md          # Prompt given to the agent, verbatim
-├── repo/            # Or a pinned git URL + commit
-├── setup.sh         # Puts the repo in the starting state
-├── accept/          # Hidden tests for acceptance criteria (not visible to agent)
-├── regress/         # Hidden tests for invariants the task doesn't mention
-├── visual/          # Optional: reference screenshots + viewport list
-└── meta.yaml        # tier, category, language, expected touched files, known traps
+evals/cases/<case>/
+├── prompt.md        # frontmatter: max_turns, allowed_tools; body: the request, verbatim
+├── case.yaml        # name, tags, expected_outcome, context.scaffold_script
+├── fixture.sh       # builds the starting repository in an empty workspace
+└── graders/*.md     # regex over files, tool_used, and llm rubrics; one file per check
 ```
 
-Target mix for a first version (about 20 tasks):
+Current cases:
+
+| Case | Tier | What it tests |
+| --- | --- | --- |
+| [`price-locale-trap`](cases/price-locale-trap/) | Integrated | A shared helper with a hidden consumer: the invoice code parses `formatPrice`'s output. Graders: default format kept, outcome rubric, no claims of unrun checks |
+| [`footer-year`](cases/footer-year/) | Lightweight | Overhead on a trivial copy change |
+| [`general-question`](cases/general-question/) | n/a | Must not trigger X-RAY |
+
+Run them (Claude Code v2.1.269 or later; fixtures need `--scaffold`, and edits need `Edit` and `Write` granted):
+
+```bash
+claude plugin eval . --scaffold --allow-tools Edit Write --runs 3
+```
+
+That runs each case with and without the plugin and reports the difference (`Δ`). For older Claude Code versions, the [outcome harness](outcome-harness/README.md) runs the same cases headlessly and grades them deterministically.
+
+Target mix for a first version (about 20 cases):
 
 | Category | Purpose |
 | --- | --- |
@@ -63,7 +76,7 @@ Target mix for a first version (about 20 tasks):
 
 Prefer small real-world repositories with permissive licenses, or tasks adapted from public benchmarks (for example SWE-bench instances) where their licenses allow. Record the source of every task.
 
-Each task must be validated before use: the starting state fails `accept/`, passes `regress/`, and a reference solution passes both.
+Each case must be validated before use: on the untouched fixture the outcome graders fail and the invariant graders pass, and a reference solution passes both. (The `price-locale-trap` grader was checked this way, including against a deliberately broken solution.)
 
 ## Metrics
 
@@ -71,8 +84,8 @@ Full definitions and scoring scales are in [scoring-rubric.md](scoring-rubric.md
 
 | Metric | Measured by | Automated? |
 | --- | --- | --- |
-| Task success | Hidden `accept/` tests pass | Yes |
-| Regressions | Hidden `regress/` tests that fail after the change | Yes |
+| Task success | Outcome graders (acceptance criteria) pass | Yes |
+| Regressions | Invariant graders (behavior the task never mentions) that fail after the change | Yes |
 | Patch quality | Diff size, files touched outside expected set, new deps, rubric score | Partly |
 | Visual correctness | Screenshot diff at listed viewports + rubric review | Partly |
 | Evidence accuracy | Claims in the agent's final report checked against reality | Manual / assisted |
@@ -85,7 +98,7 @@ Full definitions and scoring scales are in [scoring-rubric.md](scoring-rubric.md
 1. Freeze versions (model, host, X-RAY commit) and record them.
 2. For each task × condition × run: reset repo, start a fresh agent session, give `task.md`, stop at agent completion or budget limit.
 3. Save: full transcript, final diff, agent's final report, cost metrics.
-4. Run `accept/` and `regress/`; capture screenshots for visual tasks.
+4. Run the graders; capture screenshots for visual tasks.
 5. Score rubric items **blind to condition** where possible (strip skill-specific wording, such as "CONFIRMED", from reports before human review, or have a second rater check).
 6. Compare paired results per task; report per-category and overall.
 
@@ -98,7 +111,7 @@ Full definitions and scoring scales are in [scoring-rubric.md](scoring-rubric.md
 
 ## Prior work this methodology draws on
 
-- **SWE-bench**: real GitHub issues verified by hidden tests (Jimenez et al., 2024). Model for `accept/` tests.
+- **SWE-bench**: real GitHub issues verified by hidden tests (Jimenez et al., 2024). Model for outcome graders.
 - **Agentless** (Xia et al., 2024): shows simple localization → repair → validation pipelines are a strong baseline; motivates measuring cost, not just success.
 - **SWE-agent** (Yang et al., 2024): shows the agent–computer interface strongly affects results; motivates holding host and tool settings constant.
 - **SkillsBench** (Li et al., 2026) and **SWE-Skills-Bench** (Han et al., 2026): paired with-skill / without-skill runs against deterministic verifiers. SWE-Skills-Bench found most public software-engineering skills produced no pass-rate gain and a few reduced it, so a null or negative result for X-RAY is a realistic outcome, not an edge case.

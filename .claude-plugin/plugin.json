@@ -1,0 +1,23 @@
+{
+  "name": "x-ray",
+  "version": "0.2.0",
+  "description": "Evidence-based workflow for changing existing code safely: size the change by risk, trace what depends on it, decide what must not break, and report only what was verified.",
+  "author": {
+    "name": "Sumanth Kumar",
+    "url": "https://github.com/Skarycloud"
+  },
+  "homepage": "https://github.com/Skarycloud/x-ray",
+  "repository": "https://github.com/Skarycloud/x-ray",
+  "license": "MIT",
+  "keywords": [
+    "code-change",
+    "regression",
+    "impact-analysis",
+    "verification",
+    "evidence",
+    "refactoring"
+  ],
+  "experimental": {
+    "evals": "evals/cases"
+  }
+}

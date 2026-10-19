@@ -3,7 +3,7 @@ name: x-ray
 description: Use when changing existing code, such as fixing a bug, adding or extending a feature, refactoring, or modifying an API, database schema, auth or permission check, config, or shared UI component, especially in unfamiliar code or when a change could break something elsewhere. Applies to requests like "fix this error", "add X to Y", "why does this fail", "refactor this module", or "update this component". Provides an evidence-based workflow that scales investigation and verification to risk and reports only what was actually verified. Not for greenfield prototypes or non-code tasks.
 license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   status: "experimental"
 ---
 

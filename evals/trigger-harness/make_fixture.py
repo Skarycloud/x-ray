@@ -36,7 +36,7 @@ size the change by what it could break, check claims against the code, and repor
 what you actually verified. Skip it for trivial edits where nothing else can break.
 """
 
-SKILL_PARTS = ["SKILL.md", "LICENSE", "references", "templates"]
+SKILL_PARTS = ["SKILL.md", "LICENSE", "references", "templates"]  # inside skills/x-ray/
 
 for cond in ["skill-only", "skill-plus-pointer"]:
     root = OUT / cond
@@ -49,7 +49,7 @@ for cond in ["skill-only", "skill-plus-pointer"]:
     dest = root / ".claude" / "skills" / "x-ray"
     dest.mkdir(parents=True)
     for part in SKILL_PARTS:
-        src = XRAY / part
+        src = XRAY / "skills" / "x-ray" / part
         (shutil.copytree if src.is_dir() else shutil.copy)(src, dest / part)
     if cond == "skill-plus-pointer":
         (root / "CLAUDE.md").write_text(POINTER, encoding="utf-8")

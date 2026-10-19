@@ -5,7 +5,7 @@ Thanks for helping. X-RAY is early, and the most valuable contributions are **ev
 ## Most wanted
 
 1. **Host validation reports.** Follow the checklist in [adapters/README.md](adapters/README.md) on one host and add the results to that host's adapter file (host version, OS, date, what worked, what didn't).
-2. **Evaluation tasks.** Build a task matching the format in [evals/README.md](evals/README.md), with hidden acceptance and regression tests and a reference solution that passes both. Include the source and license of any code used.
+2. **Eval cases.** Build a case in the [`claude plugin eval` format](evals/README.md#task-set) with outcome and invariant graders, ideally one the baseline fails. Include the source and license of any code used.
 3. **Failure reports.** Cases where an agent following X-RAY did something wrong, wasteful, or overly slow. Include the transcript excerpt if you can.
 4. **Corrections.** Wrong paths, stale host behavior, broken links, inaccurate citations.
 

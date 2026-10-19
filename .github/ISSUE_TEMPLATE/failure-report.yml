@@ -1,0 +1,35 @@
+name: Failure report
+description: An agent following X-RAY did something wrong, wasteful, or slow
+labels: ["evidence", "failure"]
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: The request you gave the agent
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What the agent did
+      description: For example, skipped a step, over-verified a trivial change, followed a skill example over your repo's conventions, or claimed a check it didn't run.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: transcript
+    attributes:
+      label: Transcript excerpt (optional)
+      description: Remove secrets and private code first.
+      render: text
+  - type: input
+    id: env
+    attributes:
+      label: Host, model, X-RAY version
+    validations:
+      required: true

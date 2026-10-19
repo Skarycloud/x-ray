@@ -7,7 +7,8 @@
 Understand the system before changing it. Change only what the task needs. Prove the result with evidence, not confidence.
 
 [![Status: experimental](https://img.shields.io/badge/status-experimental-orange)](#limitations)
-[![Version 0.1.0](https://img.shields.io/badge/version-0.1.0-blue)](SKILL.md)
+[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-blue)](CHANGELOG.md)
+[![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757)](#quick-start)
 [![Format: Agent Skills](https://img.shields.io/badge/format-Agent%20Skills-6f42c1)](https://agentskills.io/specification)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![validate](https://github.com/Skarycloud/x-ray/actions/workflows/validate.yml/badge.svg)](https://github.com/Skarycloud/x-ray/actions/workflows/validate.yml)
@@ -15,7 +16,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 </div>
 
 > [!IMPORTANT]
-> **X-RAY is experimental.** A first trigger pilot on Claude Code shows the skill loads when it should, but its effect on results hasn't been evaluated against a baseline. Nothing in this repository claims it improves agent results. See [Limitations](#limitations) and [Evaluation](#evaluation).
+> **X-RAY is experimental.** Pilots on Claude Code show the skill loads on code-shaped requests, but it hasn't yet been shown to improve results over a baseline: in the first outcome pilot, the agent didn't invoke it, and the baseline already avoided the trap. Nothing in this repository claims X-RAY improves agent results. See [Limitations](#limitations) and [Evaluation](#evaluation).
 
 ---
 
@@ -27,6 +28,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 - [Usage](#usage)
 - [Example: one task, start to finish](#example-one-task-start-to-finish)
 - [Design choices driven by published evidence](#design-choices-driven-by-published-evidence)
+- [Standards checklist](#standards-checklist)
 - [When to use it](#when-to-use-it)
 - [Repository layout](#repository-layout)
 - [Evaluation](#evaluation)
@@ -53,7 +55,7 @@ Other skills already cover planning, TDD, debugging, minimal code, and framework
 
 ## How it works
 
-X-RAY is a workflow in [`SKILL.md`](SKILL.md). An agent loads it when a task involves changing existing code.
+X-RAY is a workflow in [`skills/x-ray/SKILL.md`](skills/x-ray/SKILL.md). An agent loads it when a task involves changing existing code.
 
 **In plain terms:** before editing, the agent works out how risky the change is, finds out what actually depends on the code it's about to touch, and writes down what must keep working. After editing, it runs the checks it picked in advance and tells you exactly what it verified and what it didn't. Small tasks stay small; risky ones get more care.
 
@@ -116,52 +118,41 @@ The user's task comes first, then the target repository's own instructions, vers
 
 ## Quick start
 
+### Claude Code (plugin, recommended)
+
+```text
+/plugin marketplace add Skarycloud/x-ray
+/plugin install x-ray@x-ray
+```
+
+This is the same mechanism Anthropic's own skills repository uses. Tested on Claude Code 2.1.131 with a local copy of this marketplace: it installed, enabled, and registered the skill as `x-ray:x-ray`. Installing straight from GitHub hasn't been tested yet.
+
+### Any host (plain skill folder)
+
+The skill is the [`skills/x-ray/`](skills/x-ray/) folder. Copy that folder, not the whole repository:
+
+```bash
+git clone https://github.com/Skarycloud/x-ray.git
+cp -r x-ray/skills/x-ray ~/.agents/skills/   # Codex, Cursor, Copilot, Gemini CLI (shared user path)
+cp -r x-ray/skills/x-ray ~/.claude/skills/   # Claude Code, if you don't use the plugin
+```
+
+Gemini CLI can also install it directly: `gemini skills install https://github.com/Skarycloud/x-ray.git --path skills/x-ray`.
+
 > [!NOTE]
-> These commands follow each host's official documentation, but **none has been tested with X-RAY yet**. The installed folder **must be named `x-ray`**, because the Agent Skills spec requires the folder name to match the skill's `name` field.
-
-**Claude Code** (personal):
-
-```bash
-git clone https://github.com/Skarycloud/x-ray.git ~/.claude/skills/x-ray
-```
-
-**OpenAI Codex** (user scope):
-
-```bash
-git clone https://github.com/Skarycloud/x-ray.git ~/.agents/skills/x-ray
-```
-
-**Cursor** (user scope):
-
-```bash
-git clone https://github.com/Skarycloud/x-ray.git ~/.cursor/skills/x-ray
-```
-
-**GitHub Copilot** (personal, CLI and local IDE):
-
-```bash
-git clone https://github.com/Skarycloud/x-ray.git ~/.copilot/skills/x-ray
-```
-
-**Gemini CLI**:
-
-```bash
-gemini skills install https://github.com/Skarycloud/x-ray.git
-```
+> Keep the copied folder named `x-ray`: the Agent Skills spec requires the folder name to match the skill's `name`. The plain-folder installs follow each host's official docs but haven't been tested with X-RAY.
 
 Project-scope paths, Windows commands, and the source for each host's behavior are in the adapter files:
 
 | Host | Adapter | Host docs support `SKILL.md` | Tested with X-RAY |
 | --- | --- | --- | --- |
-| Claude Code | [adapters/claude-code.md](adapters/claude-code.md) | Yes | Trigger pilot only ([results](adapters/claude-code.md#test-record)) |
+| Claude Code | [adapters/claude-code.md](adapters/claude-code.md) | Yes | Plugin install; trigger and outcome pilots ([results](adapters/claude-code.md#test-record)) |
 | OpenAI Codex | [adapters/codex.md](adapters/codex.md) | Yes | No |
 | Cursor | [adapters/cursor.md](adapters/cursor.md) | Yes | No |
 | GitHub Copilot | [adapters/copilot.md](adapters/copilot.md) | Yes | No |
 | Gemini CLI | [adapters/gemini-cli.md](adapters/gemini-cli.md) | Yes | No |
 
-**Optional: always-on pointer.** Agents often don't invoke an installed skill on their own. [adapters/always-on-pointer.md](adapters/always-on-pointer.md) has a four-line snippet for the target repo's `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md` that reminds the agent to use X-RAY. It's experimental and kept short on purpose, because always-loaded text has its own cost.
-
-Installing by cloning also brings the README, evals, and adapter docs. Hosts load files other than `SKILL.md` only on demand, so this should be harmless, but it's untested.
+**Optional: always-on pointer.** If your agent doesn't invoke X-RAY on its own, [adapters/always-on-pointer.md](adapters/always-on-pointer.md) has a four-line snippet for the target repo's `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`. It's experimental and kept short on purpose, because always-loaded text has its own cost.
 
 ## Usage
 
@@ -171,7 +162,7 @@ Installing by cloning also brings the README, evals, and adapter docs. Hosts loa
 
 > Add an optional `locale` parameter to `formatPrice` without breaking existing callers.
 
-**Explicit.** Invoke it by name where the host supports it: `/x-ray` in Claude Code, `$` or `/skills` in Codex, `/` in Cursor's agent chat.
+**Explicit.** Invoke it by name where the host supports it: `/x-ray:x-ray` in Claude Code with the plugin (`/x-ray` as a plain skill), `$` or `/skills` in Codex, `/` in Cursor's agent chat. Explicit invocation is the reliable option for feature requests: in the outcome pilot, a natural request ("Show prices in German format…") didn't trigger X-RAY on its own.
 
 **Alongside other skills.** If a more specific skill applies (TDD, debugging, a framework guide, a design system), X-RAY tells the agent to use it inside the matching step.
 
@@ -270,7 +261,7 @@ Verified: pnpm test -- Footer → 4 passed, 0 failed
 Not verified / risks: none
 ```
 
-More worked examples are in [references/](references/), and the full report formats are in [templates/VERIFICATION_REPORT.md](templates/VERIFICATION_REPORT.md).
+More worked examples are in [skills/x-ray/references/](skills/x-ray/references/), and the full report formats are in [skills/x-ray/templates/VERIFICATION_REPORT.md](skills/x-ray/templates/VERIFICATION_REPORT.md).
 
 ## Design choices driven by published evidence
 
@@ -286,7 +277,26 @@ Recent studies of agent skills shaped several rules. These choices follow from t
 | Always-loaded context files didn't generally improve success and raised cost by over 20% (Gloaguen et al.) | The pointer is a reminder, not the workflow, and is marked experimental. |
 | Hosts tend to under-trigger skills, and descriptions that summarize the workflow invite agents to skip the body (Anthropic `skill-creator`, Superpowers `writing-skills`) | The `description` leads with when to use it, in phrases users actually type. [Trigger queries](evals/trigger-queries.md) test it. |
 | 94% of real skills lack guards against rationalizing away steps, and 71% lack progress tracking (Hong et al.) | A "Gotchas" table of tempting thoughts, covering both skipping steps and overdoing them, and an optional checklist for Integrated and Critical work. |
-| Build evaluations before extensive documentation (Anthropic skill-authoring guidance) | **Not yet followed:** X-RAY was written before its evals. Building them is the top roadmap item. |
+| Build evaluations before extensive documentation, and compare against a no-skill baseline (Anthropic skill-authoring guidance; `claude plugin eval`) | **Followed late:** X-RAY was written before its evals. Eval cases now exist in the official `claude plugin eval` format, with a first paired pilot. |
+
+## Standards checklist
+
+How X-RAY compares with the practices of Anthropic's [skills repository](https://github.com/anthropics/skills), the [Agent Skills spec](https://agentskills.io/specification), Anthropic's [authoring guidance](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices), and widely used open-source skill repositories ([Superpowers](https://github.com/obra/superpowers), [Vercel agent-skills](https://github.com/vercel-labs/agent-skills), [Ponytail](https://github.com/DietrichGebert/ponytail)).
+
+| Practice | Where it comes from | X-RAY |
+| --- | --- | --- |
+| Skill at `skills/<name>/SKILL.md`, separate from repo docs | Anthropic, Superpowers, Vercel, Ponytail, OpenAI portable plugins | ✅ [`skills/x-ray/`](skills/x-ray/SKILL.md) |
+| Claude Code plugin marketplace (`.claude-plugin/`) | Anthropic, Superpowers, Ponytail | ✅ installs and registers (local test) |
+| Valid frontmatter; `name` matches folder | Agent Skills spec | ✅ checked in CI by the official `skills-ref` |
+| Manifests validated by the host's own tool | Claude Code docs | ✅ `claude plugin validate` in CI |
+| `SKILL.md` under 500 lines; references one level deep | Spec; authoring guidance | ✅ 143 lines; all references linked from `SKILL.md` |
+| Description says what and when, with user phrasing | Spec; `skill-creator`; Superpowers `writing-skills` | ✅ trigger-tested: 10/10 and 0/10 on code-shaped requests |
+| Workflow checklist and guards against skipped steps | Authoring guidance; SKILL.md smell study | ✅ optional checklist; "Gotchas" table |
+| License file inside the skill | Anthropic, OpenAI skills | ✅ [`skills/x-ray/LICENSE`](skills/x-ray/LICENSE) |
+| Evals with a no-skill baseline, 3+ runs | Authoring guidance; `claude plugin eval` | ⚠️ 3 cases in the official format; one paired pilot, inconclusive |
+| Tested with each model you plan to use | Authoring guidance | ❌ only `claude-opus-4-7` so far |
+| Disclaimer: test before relying on it for critical work | Anthropic skills README | ✅ status notice and [Limitations](#limitations) |
+| Changelog, security policy, issue templates | Common open-source practice | ✅ [CHANGELOG](CHANGELOG.md), [SECURITY](SECURITY.md), issue forms |
 
 ## When to use it
 
@@ -312,29 +322,30 @@ Recent studies of agent skills shaped several rules. These choices follow from t
 
 ## Repository layout
 
-The repository root **is** the skill folder. `SKILL.md` is the product; everything else supports it.
+The skill is the `skills/x-ray/` folder; everything else supports it.
 
 ```text
 x-ray/
-├── SKILL.md                         The skill: the authoritative, portable workflow
-├── references/                      Detailed procedures, loaded on demand
-│   ├── reverse-engineering.md       Tracing entry points, call paths, consumers, tests
-│   ├── evidence-ledger.md           Evidence states, entry format, durable ledger
-│   ├── invariant-contracts.md       Writing outcomes and invariants before editing
-│   ├── change-impact-analysis.md    Finding consumers, rating blast radius, safe-change patterns
-│   ├── verification.md              Choosing checks by tier, running them honestly, when to stop
-│   ├── design-engineering.md        Tokens, states, accessibility, responsiveness, motion
-│   └── security-boundaries.md       Permissions, untrusted content, secrets, unsafe actions
-├── templates/                       Optional formats, each with a short form
-│   ├── SYSTEM_MAP.md
-│   ├── CHANGE_PLAN.md
-│   └── VERIFICATION_REPORT.md
+├── skills/x-ray/                    The skill (this folder is what gets installed)
+│   ├── SKILL.md                     The authoritative, portable workflow
+│   ├── references/                  Detailed procedures, loaded on demand
+│   │   ├── reverse-engineering.md   Tracing entry points, call paths, consumers, tests
+│   │   ├── evidence-ledger.md       Evidence states, entry format, durable ledger
+│   │   ├── invariant-contracts.md   Writing outcomes and invariants before editing
+│   │   ├── change-impact-analysis.md  Finding consumers, rating blast radius, safe-change patterns
+│   │   ├── verification.md          Choosing checks by tier, running them honestly, when to stop
+│   │   ├── design-engineering.md    Tokens, states, accessibility, responsiveness, motion
+│   │   └── security-boundaries.md   Permissions, untrusted content, secrets, unsafe actions
+│   ├── templates/                   Optional formats, each with a short form
+│   └── LICENSE
+├── .claude-plugin/                  Claude Code plugin manifest and marketplace
 ├── adapters/                        Per-host install notes and the optional always-on pointer
-├── evals/                           Evaluation method, scoring rubric, trigger queries (no results yet)
+├── evals/                           Method, rubric, eval cases, trigger and outcome harnesses, results
 ├── tools/validate.py                Repository checks (stdlib only), run in CI
-├── .github/workflows/validate.yml   CI: repo checks plus the official skills-ref validator
+├── .github/                         CI (repo checks, skills-ref, plugin validate) and issue forms
 ├── AGENTS.md                        Rules for agents and humans editing this repo
-└── CONTRIBUTING.md
+├── CHANGELOG.md · CONTRIBUTING.md · SECURITY.md
+└── LICENSE
 ```
 
 ## Evaluation
@@ -342,46 +353,52 @@ x-ray/
 X-RAY's claim to usefulness has to come from measurement, not from how well its instructions read. The method is defined in [evals/README.md](evals/README.md):
 
 - **Paired runs.** The same model, host, prompt, and repository snapshot, with and without X-RAY, at least 5 runs per condition.
-- **Hidden tests.** Acceptance tests for the task, plus regression tests for behavior the task never mentions.
+- **Graders.** Outcome checks for the task, plus invariant checks for behavior the task never mentions. Cases use the official [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals) format, so anyone can run them with one command.
 - **Metrics** ([scoring-rubric.md](evals/scoring-rubric.md)): task success, regressions, patch quality, visual correctness, evidence accuracy (how often the final report claims something false), calibration, procedure overhead, and cost.
 - **Tasks chosen to expose harm too:** trivial changes where X-RAY should add no overhead, and tasks where the repo's requirements conflict with the skill's examples.
 - **Negative results get published.** A "no gain" result is realistic: in SWE-Skills-Bench, most public software-engineering skills showed none.
 
-**Current status:** the method exists. A [trigger pilot](adapters/claude-code.md#test-record) on Claude Code shows the skill loads on matching requests. No outcome tasks, fixtures, or results exist yet, so whether X-RAY improves results is still unknown.
+**Current status** (Claude Code 2.1.131, `claude-opus-4-7`):
+
+| Pilot | Result |
+| --- | --- |
+| [Trigger](adapters/claude-code.md#test-record), 20 queries × 1 run | Loaded on 10/10 code-shaped change requests, 0/10 unrelated ones |
+| [Outcome](evals/outcome-harness/README.md), `price-locale-trap`, 3 runs per arm | **Inconclusive.** X-RAY was installed but not invoked (0/3) on a natural feature request, and the baseline caught the hidden invoice consumer in every completed run. All completed runs reported honestly that tests couldn't be run. |
+| Outcome, `footer-year` (overhead) | **No result:** every run hit the account's usage limit |
+
+Whether X-RAY improves results is still unknown.
 
 ## Security
 
 Skills run with the agent's permissions, and malicious skills are a documented supply-chain risk ([OWASP Agentic Skills Top 10](https://owasp.org/www-project-agentic-skills-top-10/)). For X-RAY specifically:
 
 - **The skill is Markdown only.** It has no scripts, hooks, or `allowed-tools` grants. `tools/validate.py` is for checking this repository in CI; the skill never tells an agent to run it.
-- **It tells the agent to treat repository content as untrusted data** and to ask before destructive or outward-facing actions. See [references/security-boundaries.md](references/security-boundaries.md).
-- **Install from this repository only, and read what you install.** For a fixed version, check out a specific commit after cloning: `git -C ~/.claude/skills/x-ray checkout <commit>`.
+- **It tells the agent to treat repository content as untrusted data** and to ask before destructive or outward-facing actions. See [security-boundaries.md](skills/x-ray/references/security-boundaries.md).
+- **Install from this repository only, and read what you install.** The plugin pins to the version in its manifest; for a plain-folder install, copy from a specific commit or [release](CHANGELOG.md).
 
-Report a security problem in X-RAY through a GitHub issue. Leave exploit details out of the public issue and ask for a private contact.
+To report a problem, see [SECURITY.md](SECURITY.md).
 
 ## Limitations
 
-- **Barely tested on hosts.** A small trigger pilot on Claude Code (1 run per query, one model) loaded X-RAY on 10/10 matching requests and 0/10 non-matching ones. Behavior after loading, and every other host, are untested.
-- **Unevaluated.** There's no evidence yet that X-RAY improves outcomes over a baseline.
-- **Process skills often don't help.** In SWE-Skills-Bench, 39 of 49 public software-engineering skills produced no pass-rate gain. X-RAY is a process skill and may land in that group; only the evals can tell.
-- **It may not be invoked.** Hosts decide when to load a skill. On the Claude Code pilot it was invoked reliably without the pointer; other models and hosts may differ.
-- **Instruction-only.** X-RAY can't force an agent to follow it. Compliance depends on the model and host.
-- **Cost.** Investigation and verification cost time and tokens. Tiering and the stop rule are meant to keep trivial tasks cheap; whether they do is unmeasured.
-- **No runtime tooling.** The skill ships no scripts. CI only checks this repository's own format and links, not agent behavior.
+- **No demonstrated benefit yet.** The one paired outcome pilot was inconclusive (see [Evaluation](#evaluation)). In SWE-Skills-Bench, 39 of 49 public software-engineering skills produced no pass-rate gain; X-RAY may land in that group.
+- **Natural feature requests may not trigger it.** It loaded on 10/10 code-shaped requests but 0/3 times on "Show prices in German format for our German customers." Invoke it explicitly, or try the [always-on pointer](adapters/always-on-pointer.md), for feature work. A description change is planned, pending a re-run of the trigger tests.
+- **One host, one model.** Everything measured so far is Claude Code with `claude-opus-4-7`. Other hosts and smaller models are untested.
+- **Overhead unmeasured.** The trivial-task case exists but hasn't produced a result yet.
+- **Instruction-only.** X-RAY can't force an agent to follow it; compliance depends on the model and host. The skill ships no scripts by design, so there's nothing to execute and less to trust.
 
 ## Roadmap
 
 Planned, not implemented:
 
-1. **Host validation.** Run the checklist in [adapters/README.md](adapters/README.md) on each host and record the results.
-2. **Evaluation v1** (highest priority, since the skill was written before its evals). Start with 3–5 tasks: a trivial change, stale documentation, and a repo requirement that conflicts with the skill's examples. Then grow to about 20 validated tasks, run baseline vs X-RAY, and publish raw results, including negative ones.
-3. **Trigger testing.** Repeat the [trigger queries](evals/trigger-queries.md) with 3 runs each and a smaller model on Claude Code, then on the other hosts.
-4. **Packaging.** A slim release containing only skill files; possibly a Claude Code plugin.
-5. **Revision from evidence.** Cut or change steps the evals show to be ineffective or costly.
+1. **Finish the pilot.** Run `footer-year` and re-run `price-locale-trap` with 3+ runs per arm, using `claude plugin eval` once available.
+2. **Harder cases.** Add cases the baseline fails: traps that need cross-file tracing a strong model skips, stale docs that look authoritative, and repo rules that conflict with the skill's examples. Run a smaller model too.
+3. **Triggering on feature requests.** Revise the description for phrasings like "show…", "support…", "make X do Y", then re-run all trigger queries, held-out ones included.
+4. **Other hosts.** Run the [validation checklist](adapters/README.md#validation-checklist-for-a-host-to-do-before-marking-tested) on Codex, Cursor, Copilot, and Gemini CLI.
+5. **Revision from evidence.** Cut or change any step the evals show to be ineffective or costly.
 
 ## Contributing
 
-The most useful contributions are **evidence**: host test reports, evaluation tasks with hidden tests, and documented cases where an agent following X-RAY did something wrong or wasteful. See [CONTRIBUTING.md](CONTRIBUTING.md), and read [AGENTS.md](AGENTS.md) before editing: its rules apply to human contributors too.
+The most useful contributions are **evidence**: host test reports, eval cases the baseline fails, and documented cases where an agent following X-RAY did something wrong or wasteful. Issue forms for host reports and failure reports are ready to use. See [CONTRIBUTING.md](CONTRIBUTING.md), and read [AGENTS.md](AGENTS.md) before editing: its rules apply to human contributors too.
 
 ## Research references
 
@@ -438,7 +455,7 @@ These works informed X-RAY's design. They're cited for attribution. None of them
 <details>
 <summary><strong>Design and accessibility</strong></summary>
 
-- Emil Kowalski's writing on UI and animation. https://emilkowal.ski. Purposeful, fast, interruptible motion; informs the motion guidance in `references/design-engineering.md`.
+- Emil Kowalski's writing on UI and animation. https://emilkowal.ski. Purposeful, fast, interruptible motion; informs the motion guidance in `skills/x-ray/references/design-engineering.md`.
 - W3C. *Web Content Accessibility Guidelines (WCAG) 2.2.* https://www.w3.org/TR/WCAG22/.
 
 </details>

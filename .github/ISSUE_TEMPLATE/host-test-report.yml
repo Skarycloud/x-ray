@@ -1,0 +1,42 @@
+name: Host test report
+description: Report how X-RAY behaved on a host (Claude Code, Codex, Cursor, Copilot, Gemini CLI, other)
+labels: ["evidence", "host-report"]
+body:
+  - type: input
+    id: host
+    attributes:
+      label: Host and version
+      placeholder: "Claude Code 2.1.131"
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: "claude-opus-4-7"
+    validations:
+      required: true
+  - type: input
+    id: install
+    attributes:
+      label: How you installed X-RAY, and the commit or version
+      placeholder: "/plugin install x-ray@x-ray, v0.2.0"
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Validation checklist results
+      description: Steps from adapters/README.md. Mark each pass, fail, or not tried.
+      value: |
+        1. Install steps worked:
+        2. Host lists the skill:
+        3. Explicit invocation loads SKILL.md:
+        4. Trigger queries (evals/trigger-queries.md), should-trigger x/10, should-not x/10:
+        5. Agent can open a reference file:
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything surprising

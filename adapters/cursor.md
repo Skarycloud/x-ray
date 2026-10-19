@@ -21,12 +21,15 @@ Invocation:
 
 ## Intended installation (untested)
 
-```bash
-# User scope
-git clone https://github.com/Skarycloud/x-ray.git ~/.cursor/skills/x-ray
+Get the skill folder first. The skill lives in `skills/x-ray/` inside the repository:
 
-# Project scope
-git clone https://github.com/Skarycloud/x-ray.git .cursor/skills/x-ray
+```bash
+git clone https://github.com/Skarycloud/x-ray.git
+```
+
+```bash
+cp -r x-ray/skills/x-ray ~/.cursor/skills/              # user scope (or ~/.agents/skills/)
+cp -r x-ray/skills/x-ray <target-repo>/.cursor/skills/  # project scope
 ```
 
 ## Notes

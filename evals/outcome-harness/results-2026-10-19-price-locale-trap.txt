@@ -1,0 +1,8 @@
+{"run": "with-1", "skill": false, "turns": 15, "cost": 0.5891067500000001, "secs": 86, "status": "success", "invoice_ok": true, "default_ok": true, "raw": {"invoice": 1234.5, "fmt": "€1,234.50"}}
+{"run": "with-2", "skill": false, "turns": 12, "cost": 0.39017999999999997, "secs": 60, "status": "success", "invoice_ok": true, "default_ok": true, "raw": {"invoice": 1234.5, "fmt": "€1,234.50"}}
+{"run": "with-3", "skill": false, "turns": 26, "cost": 0.8561422499999999, "secs": 119, "status": "success", "invoice_ok": true, "default_ok": true, "raw": {"invoice": 1234.5, "fmt": "€1,234.50"}}
+{"run": "without-1", "skill": false, "turns": 13, "cost": 0.49366075, "secs": 53, "status": "success", "invoice_ok": true, "default_ok": true, "raw": {"invoice": 1234.5, "fmt": "€1,234.50"}}
+{"run": "without-2", "skill": false, "turns": 25, "cost": 0.8628610000000001, "secs": 139, "status": "success", "invoice_ok": true, "default_ok": true, "raw": {"invoice": 1234.5, "fmt": "€1,234.50"}}
+{"run": "without-3", "skill": false, "turns": 12, "cost": 0.39891024999999997, "secs": 51, "status": "success", "invoice_ok": true, "default_ok": true, "raw": {"invoice": 1234.5, "fmt": "€1,234.50"}}
+with     runs=3 skill=0/3 mean_cost=$0.61 mean_turns=17.7 invoice_ok 3/3 default_ok 3/3
+without  runs=3 skill=0/3 mean_cost=$0.59 mean_turns=16.7 invoice_ok 3/3 default_ok 3/3

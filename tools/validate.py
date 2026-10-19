@@ -3,8 +3,10 @@
 Usage: python tools/validate.py [repo_root]
 
 Checks:
-  1. SKILL.md frontmatter follows the Agent Skills spec (rules mirror skills-ref).
-  2. SKILL.md stays under the line limit set in AGENTS.md.
+  1. Each skills/<name>/SKILL.md frontmatter follows the Agent Skills spec
+     (rules mirror skills-ref), including name == folder name.
+  2. Each SKILL.md stays under the line limit set in AGENTS.md, and its
+     metadata version matches .claude-plugin/plugin.json.
   3. Every relative Markdown link and #anchor resolves.
   4. Tier names and evidence states are spelled consistently.
 Exits 1 if any check fails.
@@ -47,15 +49,28 @@ def frontmatter(text):
     return fields
 
 
+def check_skills(root, errors):
+    dirs = sorted(p.parent for p in (root / "skills").glob("*/SKILL.md"))
+    if not dirs:
+        errors.append("No skills found under skills/<name>/SKILL.md")
+    for d in dirs:
+        check_skill(d, errors)
+    manifest = root / ".claude-plugin" / "plugin.json"
+    if manifest.is_file():
+        import json
+        plugin_version = json.loads(manifest.read_text(encoding="utf-8")).get("version")
+        for d in dirs:
+            m = re.search(r'^\s+version:\s*"?([^"\n]+)"?', (d / "SKILL.md").read_text(encoding="utf-8"), re.M)
+            if m and m.group(1) != plugin_version:
+                errors.append(f"{d.name}: SKILL.md version {m.group(1)} != plugin.json version {plugin_version}")
+
+
 def check_skill(root, errors):
     skill = root / "SKILL.md"
-    if not skill.is_file():
-        errors.append("Missing required file: SKILL.md")
-        return
     text = skill.read_text(encoding="utf-8")
     fields = frontmatter(text)
     if fields is None:
-        errors.append("SKILL.md: no YAML frontmatter")
+        errors.append(f"{skill}: no YAML frontmatter")
         return
     for key in fields.keys() - ALLOWED_FIELDS:
         errors.append(f"SKILL.md: unexpected frontmatter field '{key}'")
@@ -87,7 +102,7 @@ def check_skill(root, errors):
     lines = len(text.splitlines())
     if lines > MAX_SKILL_LINES:
         errors.append(f"SKILL.md: {lines} lines (target under {MAX_SKILL_LINES})")
-    print(f"SKILL.md: name={name!r}, description={len(desc)} chars, {lines} lines")
+    print(f"{root.name}/SKILL.md: name={name!r}, description={len(desc)} chars, {lines} lines")
 
 
 def slug(heading):
@@ -134,7 +149,7 @@ def check_terms(root, errors):
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
     errors = []
-    check_skill(root, errors)
+    check_skills(root, errors)
     check_links(root, errors)
     check_terms(root, errors)
     for e in errors:

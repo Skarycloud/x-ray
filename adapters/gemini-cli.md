@@ -25,11 +25,11 @@ Commands: `/skills list`, `/skills link <path>`, `/skills enable|disable <name>`
 ## Intended installation (untested)
 
 ```bash
-# User scope, from GitHub
-gemini skills install https://github.com/Skarycloud/x-ray.git
+# User scope, straight from GitHub (--path points at the skill inside the repo)
+gemini skills install https://github.com/Skarycloud/x-ray.git --path skills/x-ray
 
 # Workspace scope, from a local clone
-gemini skills install ./x-ray --scope workspace
+gemini skills install ./x-ray/skills/x-ray --scope workspace
 ```
 
 ## Notes

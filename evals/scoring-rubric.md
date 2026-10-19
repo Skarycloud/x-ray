@@ -6,15 +6,15 @@ Each run gets scored on eight dimensions. Automated measures come first; rubric 
 
 | Score | Definition |
 | --- | --- |
-| Pass | All `accept/` tests pass |
-| Partial | Some `accept/` tests pass (report fraction) |
-| Fail | No `accept/` tests pass, build broken, or agent gave up |
+| Pass | All outcome graders pass |
+| Partial | Some outcome graders pass (report fraction) |
+| Fail | No outcome graders pass, build broken, or agent gave up |
 
 Primary metric: pass rate across runs.
 
 ## 2. Regressions (automated)
 
-- **Count**: `regress/` tests passing at start that fail after the change.
+- **Count**: invariant graders passing at start that fail after the change.
 - **Regression-free success**: Pass on task success **and** zero regressions. This is the headline combined metric.
 
 ## 3. Patch quality

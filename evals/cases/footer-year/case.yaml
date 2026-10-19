@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: footer-year
+description: Lightweight copy change. Measures whether X-RAY adds cost where nothing else can break.
+expected_outcome: The footer shows 2026, nothing else changes, and the run costs about the same with and without X-RAY.
+tags: [outcome, lightweight, overhead]
+context:
+  scaffold_script: fixture.sh

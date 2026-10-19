@@ -22,15 +22,18 @@ Activation: in agent mode, Copilot decides when a skill is relevant and loads it
 
 ## Intended installation (untested)
 
-```bash
-# Project scope (works for repo-based surfaces such as cloud agent)
-git clone https://github.com/Skarycloud/x-ray.git .github/skills/x-ray
+Get the skill folder first. The skill lives in `skills/x-ray/` inside the repository:
 
-# Personal scope (CLI / local IDE)
-git clone https://github.com/Skarycloud/x-ray.git ~/.copilot/skills/x-ray
+```bash
+git clone https://github.com/Skarycloud/x-ray.git
 ```
 
-Cloning a repo inside another repo creates a nested Git repository. For a committed project install, copy the files or use a submodule instead.
+```bash
+cp -r x-ray/skills/x-ray <target-repo>/.github/skills/  # project scope (cloud agent and other repo-based surfaces)
+cp -r x-ray/skills/x-ray ~/.copilot/skills/             # personal scope (CLI, local IDE)
+```
+
+Copying the folder, rather than cloning into the target repository, avoids creating a nested Git repository.
 
 ## Notes
 

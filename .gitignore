@@ -9,6 +9,7 @@ Thumbs.db
 .env
 .env.*
 
-# Future eval run output (raw transcripts, diffs, screenshots)
+# Eval run output (raw transcripts, diffs, reports)
 evals/runs/
 evals/**/output/
+evals/cases/results/

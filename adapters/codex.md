@@ -24,13 +24,18 @@ Optional `agents/openai.yaml` can set UI metadata and invocation policy. X-RAY d
 
 ## Intended installation (untested)
 
-```bash
-# User scope
-git clone https://github.com/Skarycloud/x-ray.git ~/.agents/skills/x-ray
+Get the skill folder first. The skill lives in `skills/x-ray/` inside the repository:
 
-# Repository scope (from the target repo root)
-git clone https://github.com/Skarycloud/x-ray.git .agents/skills/x-ray
+```bash
+git clone https://github.com/Skarycloud/x-ray.git
 ```
+
+```bash
+cp -r x-ray/skills/x-ray ~/.agents/skills/              # user scope
+cp -r x-ray/skills/x-ray <target-repo>/.agents/skills/  # repository scope
+```
+
+Codex's plugin docs say it also reads the legacy `.claude-plugin/marketplace.json` that this repository ships, so `codex plugin marketplace add Skarycloud/x-ray` may work. Codex's portable plugin format discovers skills from `skills/`, which matches this layout. Neither has been tested.
 
 ## Notes
 

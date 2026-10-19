@@ -1,0 +1,17 @@
+{
+  "name": "x-ray",
+  "owner": {
+    "name": "Sumanth Kumar",
+    "url": "https://github.com/Skarycloud"
+  },
+  "metadata": {
+    "description": "X-RAY: an evidence-based engineering skill for AI coding agents working on existing code"
+  },
+  "plugins": [
+    {
+      "name": "x-ray",
+      "source": "./",
+      "description": "Evidence-based workflow for changing existing code safely, scaled to risk."
+    }
+  ]
+}
