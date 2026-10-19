@@ -1,0 +1,14 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Local environment and secrets
+.env
+.env.*
+
+# Future eval run output (raw transcripts, diffs, screenshots)
+evals/runs/
+evals/**/output/

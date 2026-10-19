@@ -1,0 +1,32 @@
+# Adapters
+
+X-RAY ships as one portable skill: [`SKILL.md`](../SKILL.md) plus the files it links to. It follows the [Agent Skills specification](https://agentskills.io/specification). Adapters describe how each host discovers and loads that skill. They don't fork the workflow.
+
+## Status at a glance
+
+Docs last checked: **2026-10-19**. Host behavior changes often, so re-check the linked docs before relying on a path.
+
+| Host | Host documents native `SKILL.md` support | X-RAY tested on this host | Adapter |
+| --- | --- | --- | --- |
+| Claude Code | Yes | **No** | [claude-code.md](claude-code.md) |
+| OpenAI Codex | Yes | **No** | [codex.md](codex.md) |
+| Cursor | Yes | **No** | [cursor.md](cursor.md) |
+| GitHub Copilot | Yes | **No** | [copilot.md](copilot.md) |
+| Gemini CLI | Yes | **No** | [gemini-cli.md](gemini-cli.md) |
+
+"Host documents support" means the host's official docs describe loading Agent Skills from a `SKILL.md` directory. It does **not** mean anyone has run X-RAY on that host and confirmed that it triggers and behaves as intended. That validation is planned (see [evals/README.md](../evals/README.md)).
+
+## Shared layout facts
+
+- The Agent Skills spec requires the `name` field to match the skill's parent directory name. X-RAY's `name` is `x-ray`, so the installed directory must be named `x-ray`.
+- The repository root **is** the skill directory. Installing by copying or cloning the repo also brings `README.md`, `CONTRIBUTING.md`, `adapters/`, and `evals/`. Hosts load files other than `SKILL.md` only on demand, so this should be harmless. It's untested, though, and a slimmer packaged release may come later.
+- `.agents/skills/` is documented as a project skill location by Codex, Cursor, GitHub Copilot, and Gemini CLI. `.claude/skills/` is documented by Claude Code, Cursor, and GitHub Copilot. No single path is documented by all five hosts as of the date above.
+
+## Validation checklist for a host (to do before marking "tested")
+
+1. Install using only the steps in that host's adapter file.
+2. Confirm the host lists the skill (slash menu, `/skills`, settings, or equivalent).
+3. Confirm explicit invocation loads `SKILL.md`.
+4. Confirm implicit triggering on a matching task ("fix this bug in the checkout service") and **non**-triggering on an unrelated one ("write a haiku").
+5. Confirm the agent can open a linked reference file (for example `references/verification.md`).
+6. Record host version, OS, date, and results in the adapter file.
