@@ -25,7 +25,7 @@ Understand the system before changing it. Change only what the task needs. Prove
 - [How it works](#how-it-works)
 - [Quick start](#quick-start)
 - [Usage](#usage)
-- [What a run looks like](#what-a-run-looks-like)
+- [Example: one task, start to finish](#example-one-task-start-to-finish)
 - [Design choices driven by published evidence](#design-choices-driven-by-published-evidence)
 - [When to use it](#when-to-use-it)
 - [Repository layout](#repository-layout)
@@ -54,6 +54,21 @@ Other skills already cover planning, TDD, debugging, minimal code, and framework
 ## How it works
 
 X-RAY is a workflow in [`SKILL.md`](SKILL.md). An agent loads it when a task involves changing existing code.
+
+**In plain terms:** before editing, the agent works out how risky the change is, finds out what actually depends on the code it's about to touch, and writes down what must keep working. After editing, it runs the checks it picked in advance and tells you exactly what it verified and what it didn't. Small tasks stay small; risky ones get more care.
+
+```mermaid
+flowchart LR
+    A[Task] --> B{How much<br/>can this break?}
+    B -->|Little| C[Read the file<br/>and its callers]
+    B -->|A lot| D[Trace the system<br/>Label the evidence<br/>Write what must not break]
+    C --> E[Make the<br/>smallest change]
+    D --> E
+    E --> F[Run the checks<br/>chosen up front]
+    F --> G[Report what was<br/>and wasn't verified]
+```
+
+See [Example: one task, start to finish](#example-one-task-start-to-finish) for the whole workflow applied to a realistic task.
 
 ### 1. Size the task first
 
@@ -160,32 +175,102 @@ Installing by cloning also brings the README, evals, and adapter docs. Hosts loa
 
 **Alongside other skills.** If a more specific skill applies (TDD, debugging, a framework guide, a design system), X-RAY tells the agent to use it inside the matching step.
 
-## What a run looks like
+## Example: one task, start to finish
 
-A Lightweight change ends with a three-line report (illustrative):
+> [!NOTE]
+> This example is illustrative. It shows what each step asks the agent to do in a made-up codebase. It isn't output from a recorded agent run.
+
+**The request:** *"Show prices in German format for our German customers."*
+
+**The trap.** The obvious fix is to make the shared `formatPrice` helper use the customer's locale everywhere. It looks like a one-file change. But in this codebase the invoice generator reads the formatted price back as a number. Switch to German format (`1.234,50 €`) and the invoice code reads a total of 1234.50 as 1.2345. The `formatPrice` tests still pass, and the agent reports "Done, tests pass."
+
+Here's how each X-RAY step catches it.
+
+**Step 0: Size it.** `formatPrice` is shared across the app, so this is **Integrated**, not Lightweight, even though the edit itself will be small.
+
+**Step 1: Define done.**
+
+```text
+Goal: German customers see prices in German format.
+AC1:  formatPrice(1234.5, "EUR", "de-DE") returns "1.234,50 €"
+AC2:  Every existing call without a locale returns exactly what it returns today
+Out of scope: currency conversion, translating other text
+```
+
+**Step 2: Read the house rules.** The repo's `AGENTS.md` says to run `pnpm test`, and CI also runs `pnpm typecheck`. Those become the checks, instead of whatever the agent would guess.
+
+**Step 3: Trace what depends on it.**
+
+```text
+$ rg -n "formatPrice\("
+14 call sites: cart, checkout, order emails, ... and:
+src/invoice/pdf.ts:58   parseFloat(formatPrice(total, cur).replace(/[^0-9.]/g, ""))
+```
+
+That last line is the trap: the invoice code parses the formatted text.
+
+**Step 4: Label the evidence.**
+
+```text
+[CONFIRMED]    formatPrice has 14 callers.        source: rg -n "formatPrice\("
+[CONTRADICTED] README says formatPrice is "display only", but src/invoice/pdf.ts:58
+               parses its output. Trusting the code; flagging the README.
+[UNKNOWN]      Does the mobile app also use this helper?   resolve: ask the mobile team
+```
+
+**Steps 5 and 6: Write what must stay true, and how each item will be checked**, before touching any code.
+
+```text
+O1  German format when locale "de-DE" is passed          → new unit test
+I1  Output with no locale unchanged for every currency    → existing 12 price tests
+I2  Invoice totals unchanged                              → tests/invoice.test.ts
+I3  No new dependency                                     → package.json diff is empty
+```
+
+**Step 7: Make the smallest change.** Add an optional `locale` parameter to `formatPrice` and pass it to `Intl.NumberFormat`, which the helper already uses. With no locale passed, the helper behaves exactly as before, so the invoice code is untouched. Only the storefront's price component passes the customer's locale. No new library.
+
+**Step 8: Design.** No layout or styling changes, so this step adds nothing here.
+
+**Step 9: Verify, then stop.** All checks run after the last edit:
+
+```text
+pnpm test -- price      13 passed (12 existing + 1 new)
+pnpm test -- invoice     6 passed
+pnpm typecheck           0 errors
+```
+
+Every item in the contract now has a passing check, so verification stops. No extra full-suite reruns "just to be sure".
+
+**Step 10: Review the diff and report.**
+
+```text
+Changed:  src/lib/price.ts: optional locale parameter
+          src/components/Price.tsx: passes the customer's locale
+Verified: price tests 13/13, invoice tests 6/6, typecheck clean (all after the final edit)
+Not verified / risks:
+  - Whether the mobile app uses formatPrice is UNKNOWN (question sent to the mobile team)
+  - README.md:41 wrongly calls formatPrice display-only; flagged, not changed (out of scope)
+```
+
+**The difference:**
+
+| | A plausible shortcut | With X-RAY |
+| --- | --- | --- |
+| The change | Locale applied to every call | Opt-in parameter; default unchanged |
+| Invoices | Silently wrong | Unchanged, and covered by a test |
+| The report | "Done, tests pass." | What was checked, plus the open question about mobile |
+
+### And a trivial task
+
+A Lightweight change skips almost all of that and ends with a three-line report:
 
 ```text
 Changed: src/components/Footer.tsx: fixed copyright year typo
-Verified: npm test -- Footer → 4 passed, 0 failed
+Verified: pnpm test -- Footer → 4 passed, 0 failed
 Not verified / risks: none
 ```
 
-An Integrated or Critical change records its reasoning as it goes. This trace comes from the illustrative example in [references/reverse-engineering.md](references/reverse-engineering.md); it isn't output from a recorded run.
-
-```text
-Anchor: "discount" + 500 on POST /orders
-Entry: src/routes/orders.ts:42 createOrder handler            CONFIRMED
-Path:  createOrder → pricing.applyDiscount (src/pricing.ts:88)
-       → payments.charge (src/payments/stripe.ts:31)            CONFIRMED
-Cause: charge() called with amount 0; provider rejects 0-amount
-       charges, error is uncaught → 500                         CONFIRMED (reproduced locally)
-Consumers of applyDiscount: createOrder, previewCart,
-       invoice export job                                       CONFIRMED (rg)
-Unknown: does the finance export expect a payment record for
-       every order?                                             UNKNOWN → ask
-```
-
-Full report formats: [templates/VERIFICATION_REPORT.md](templates/VERIFICATION_REPORT.md).
+More worked examples are in [references/](references/), and the full report formats are in [templates/VERIFICATION_REPORT.md](templates/VERIFICATION_REPORT.md).
 
 ## Design choices driven by published evidence
 
